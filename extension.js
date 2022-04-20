@@ -1,4 +1,5 @@
 const vscode = require('vscode')
+const fuse = require('fuse.js')
 
 /**
  * @param {string} desiredWord Optional
@@ -17,21 +18,21 @@ function findJsonKey(desiredWord) {
 		const activeEditor = vscode.window.activeTextEditor
 		const editorText = activeEditor.document.getText()
 		const lineAmount = getAllIndexes(editorText, '\r\n')
-		let desiredWordIndex
-
+		let lineContentAmount = []
+		
 		for(let i = 0; i < lineAmount.length; i++) {
 			let currentIndex = lineAmount[i]
 			let nextIndex = lineAmount[1 + i]
 
 			let slicedEditor = editorText.slice(currentIndex, nextIndex)
-			let desiredIndex = slicedEditor.trim() === desiredWord.trim()
-			
-			if(desiredIndex) {
-				desiredWordIndex = activeEditor.document.lineAt(++i).range
-				break
-			}
+			lineContentAmount.push(slicedEditor.replace('\r\n', ''))
 		}
-		activeEditor.selection = new vscode.Selection(desiredWordIndex.start, desiredWordIndex.end)
+
+		lineContentAmount = new fuse(lineContentAmount, { includeScore: true })
+		let search = lineContentAmount.search(desiredWord)[0]
+		desiredWordIndex = activeEditor.document.lineAt(++search.refIndex).range
+
+		search.score === 0? activeEditor.selection = new vscode.Selection(desiredWordIndex.start, desiredWordIndex.end): null
 		
 		if (!activeEditor) {
 			return
