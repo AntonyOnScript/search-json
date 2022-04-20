@@ -24,7 +24,7 @@ function findJsonKey(desiredWord) {
 			let nextIndex = lineAmount[1 + i]
 
 			let slicedEditor = editorText.slice(currentIndex, nextIndex)
-			let desiredIndex = slicedEditor === desiredWord
+			let desiredIndex = slicedEditor.trim() === desiredWord.trim()
 			
 			if(desiredIndex) {
 				desiredWordIndex = activeEditor.document.lineAt(++i).range
