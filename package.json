@@ -10,15 +10,21 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:search-json.helloWorld"
+        "onCommand:search-json.helloWorld",
+        "onCommand:search-json.searchJson"
 	],
 	"main": "./extension.js",
 	"contributes": {
-		"commands": [{
-            "command": "search-json.helloWorld",
-            "title": "Hello World"
-
-		}]
+		"commands": [
+			{
+				"command": "search-json.helloWorld",
+				"title": "Hello World"
+			},
+			{
+				"command": "search-json.searchJson",
+				"title": "Search Json"
+			}
+		]
 	},
 	"scripts": {
 		"lint": "eslint .",

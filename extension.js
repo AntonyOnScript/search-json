@@ -1,33 +1,68 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode')
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+/**
+ * @param {string} desiredWord Optional
+ */
+function findJsonKey(desiredWord) {
+	let searchInputBox = vscode.window.createInputBox()
+	searchInputBox.onDidAccept(() => {
+		searchInputBox.hide()
+		searchWord()
+		desiredWord = searchInputBox.value
+	})
+	searchInputBox.show()
+	
+	function searchWord() {
+		if(searchInputBox.value) desiredWord = searchInputBox.value
+		const activeEditor = vscode.window.activeTextEditor
+		const editorText = activeEditor.document.getText()
+		const lineAmount = getAllIndexes(editorText, '\r\n')
+		let desiredWordIndex
+
+		for(let i = 0; i < lineAmount.length; i++) {
+			let currentIndex = lineAmount[i]
+			let nextIndex = lineAmount[1 + i]
+
+			let slicedEditor = editorText.slice(currentIndex, nextIndex)
+			let desiredIndex = slicedEditor === desiredWord
+			
+			if(desiredIndex) {
+				desiredWordIndex = activeEditor.document.lineAt(++i).range
+				break
+			}
+		}
+		activeEditor.selection = new vscode.Selection(desiredWordIndex.start, desiredWordIndex.end)
+		
+		if (!activeEditor) {
+			return
+		}
+	}
+}
+
+function getAllIndexes(arr, val) {
+    var indexes = [], i = -1
+    while ((i = arr.indexOf(val, i+1)) != -1) {
+        indexes.push(i)
+    }
+    return indexes
+}
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "search-json" is now active!')
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('search-json.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from search-json!')
+		vscode.window.showInformationMessage('Search json has been activated, i hope you enjoy it! @AntonyOnScript')
 	})
 
+	let searchJson = vscode.commands.registerCommand('search-json.searchJson', function() {	
+		findJsonKey('paçoca')
+	})
+
+	context.subscriptions.push(searchJson)
 	context.subscriptions.push(disposable)
 }
 
-// this method is called when your extension is deactivated
 function deactivate() {}
 
 module.exports = {
